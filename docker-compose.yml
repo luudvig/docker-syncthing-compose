@@ -9,11 +9,11 @@ services:
 
   rclone:
     command: >
-      -c "apk add gpg &&
-          tar --create --file=/tmp/Files.tgz --gzip [!config]* &&
-          gpg --batch --cipher-algo AES256 --output /tmp/Files.tgz.gpg --passphrase-file /config/rclone/gpg_passphrase.txt --symmetric /tmp/Files.tgz;
-          rclone copy $(find -name *.kdbx -type f) remote:;
-          rclone copy /tmp/Files.tgz.gpg remote:"
+      -c "rclone copy $(find -not -path '*/.*' -name '*.kdbx' -type f) remote:;
+          apk add --no-cache gnupg &&
+          tar --create --file /tmp/Files.tar [!config]* &&
+          gpg --batch --cipher-algo AES256 --output /tmp/Files.tar.gpg --passphrase-file /config/rclone/gpg_passphrase.txt --symmetric /tmp/Files.tar &&
+          rclone copy /tmp/Files.tar.gpg remote:"
     entrypoint: sh
     image: rclone/rclone:latest
     network_mode: host
